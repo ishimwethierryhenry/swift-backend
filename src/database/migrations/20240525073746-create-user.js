@@ -1,3 +1,4 @@
+// src/database/migrations/20240525073746-create-user.js
 "use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -28,7 +29,8 @@ module.exports = {
         type: Sequelize.STRING,
       },
       role: {
-        type: Sequelize.STRING,
+        type: Sequelize.ENUM('admin', 'operator', 'overseer', 'guest'),
+        defaultValue: 'operator',
       },
       gender: {
         type: Sequelize.STRING,

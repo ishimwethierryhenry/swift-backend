@@ -1,3 +1,4 @@
+// src/validations/userSchema.js
 import Joi from "joi";
 
 const userSchema = Joi.object({
@@ -43,6 +44,11 @@ const userSchema = Joi.object({
 
   location: Joi.string().required().messages({
     "string.empty": "The location field can not be empty",
+  }),
+
+  // Optional role field for user creation
+  role: Joi.string().valid("admin", "operator", "overseer", "guest").optional().messages({
+    "any.only": "Role must be one of: admin, operator, overseer, guest",
   }),
 });
 

@@ -1,3 +1,4 @@
+// src/database/models/user.js
 "use strict";
 
 const bcrypt = require("bcryptjs");
@@ -29,8 +30,11 @@ module.exports = (sequelize, DataTypes) => {
       location: DataTypes.STRING,
       pwd: DataTypes.STRING,
       role: {
-        type: DataTypes.STRING,
-        defaultValue: "operator",
+        type: DataTypes.ENUM('admin', 'operator', 'overseer', 'guest'),
+        defaultValue: 'operator',
+        validate: {
+          isIn: [['admin', 'operator', 'overseer', 'guest']]
+        }
       },
       gender: DataTypes.STRING,
     },

@@ -1,7 +1,9 @@
+// src/controllers/userController.js
 import { User } from "../database/models";
 import bcrypt from "bcrypt";
 import generateToken from "../helpers/tokenGen";
 import userSchema from "../validations/userSchema";
+
 class UserController {
   //signup
   static async createUser(req, res) {
@@ -24,6 +26,17 @@ class UserController {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash("12345678", salt);
 
+      // Determine default role based on request or default to 'operator'
+      const userRole = req.body.role || "operator";
+      
+      // Validate role
+      const allowedRoles = ['admin', 'operator', 'overseer', 'guest'];
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(400).json({
+          message: "Invalid role specified. Allowed roles: admin, operator, overseer, guest"
+        });
+      }
+
       const newUser = await User.create({
         fname: req.body.fname,
         lname: req.body.lname,
@@ -32,7 +45,7 @@ class UserController {
         location: req.body.location,
         pwd: hashedPassword,
         gender: req.body.gender,
-        role: "operator",
+        role: userRole,
       });
 
       return res.status(201).json({
@@ -46,8 +59,8 @@ class UserController {
         .json({ message: "Internal server error", error: error.message });
     }
   }
-  //login
 
+  //login
   static async login(req, res) {
     try {
       const { email, pwd } = req.body;
@@ -63,7 +76,18 @@ class UserController {
 
         const token = await generateToken(payload, "1d");
 
-        return res.status(200).json({ token, message: "login successful" });
+        return res.status(200).json({ 
+          token, 
+          message: "login successful",
+          user: {
+            id: user.id,
+            fname: user.fname,
+            lname: user.lname,
+            email: user.email,
+            role: user.role,
+            location: user.location
+          }
+        });
       } else {
         return res.status(400).json({ message: "invalid credentials" });
       }
@@ -71,6 +95,7 @@ class UserController {
       return res.status(500).json({ message: "login failed" });
     }
   }
+
   //single user
   static async getSingleUser(req, res) {
     try {
@@ -131,11 +156,41 @@ class UserController {
     }
   }
 
+  // get guests by location
+  static async getAllGuests(req, res) {
+    try {
+      const { location } = req.params;
+      const locationStr = location.replace("&", " ");
+      const users = await User.findAll({
+        where: { location: locationStr, role: "guest" },
+      });
+      res.status(200).json({
+        status: "success",
+        allUsers: users,
+      });
+    } catch (error) {
+      res.status(404).json({
+        status: "fail",
+        error: error.message,
+      });
+    }
+  }
+
   // Update user role
   static async updateUserRole(req, res) {
     try {
       const userId = req.params.userId;
       const newRole = req.body.newRole;
+      
+      // Validate role
+      const allowedRoles = ['admin', 'operator', 'overseer', 'guest'];
+      if (!allowedRoles.includes(newRole)) {
+        return res.status(400).json({
+          status: "fail",
+          message: "Invalid role specified. Allowed roles: admin, operator, overseer, guest"
+        });
+      }
+
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({
@@ -190,6 +245,7 @@ class UserController {
       });
     }
   }
+
   // Delete user
   static async deleteUser(req, res) {
     try {
