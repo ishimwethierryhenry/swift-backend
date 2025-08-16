@@ -10,18 +10,29 @@ module.exports = {
         depth: "1.2m",
         l: "9m",
         w: "4.5m",
-        location: "Olympic Hotel",
+        location: "serena",
         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: "32209d12-ddad-4633-a37a-d11bc22ba4fc",
+        name: "pool702897",
+        depth: "1.2m",
+        l: "12m",
+        w: "6m",
+        location: "Dove hotel",
+        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
       {
         id: "32109d12-ddad-4938-a37a-c17bc22aa4bc",
         name: "pool02",
         depth: "1.2m",
         l: "12m",
         w: "6m",
-        location: "Olympic Hotel",
+        location: "serena",
         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
         createdAt: new Date(),
         updatedAt: new Date(),
