@@ -6,9 +6,9 @@ module.exports = {
     await queryInterface.bulkInsert("Users", [
       {
         id: "57409d12-ddad-4938-a37a-c17bc33aa4ba",
-        fname: "kalinda",
-        lname: "vital",
-        phone: "078979909",
+        fname: "Thierry Henry",
+        lname: "ISHIMWE",
+        phone: "0787496224",
         email: "admin@gmail.com",
         pwd: "$2a$10$rBFBTSLIrH2jTMrBPe9QEO3hSVS6UvuYvkPkA1wYzba6B0FIhI1XW", //12345678
         role: "admin",
@@ -19,8 +19,8 @@ module.exports = {
       },
       {
         id: "57409d12-ddad-4938-a37a-c17bc22aa4bc",
-        fname: "john",
-        lname: "doe",
+        fname: "John",
+        lname: "RUGWIRO",
         phone: "078979908",
         email: "john@gmail.com",
         pwd: "$2a$10$rBFBTSLIrH2jTMrBPe9QEO3hSVS6UvuYvkPkA1wYzba6B0FIhI1XW", //12345678
