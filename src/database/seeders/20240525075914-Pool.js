@@ -21,7 +21,7 @@ module.exports = {
         depth: "1.2m",
         l: "12m",
         w: "6m",
-        location: "Dove hotel",
+        location: "serena",
         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
         createdAt: new Date(),
         updatedAt: new Date(),
