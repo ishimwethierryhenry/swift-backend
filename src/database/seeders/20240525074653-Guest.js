@@ -7,14 +7,14 @@ module.exports = {
     await queryInterface.bulkInsert("Users", [
       {
         id: "57409d12-ddad-4938-a37a-c17bc33aa4bd",
-        fname: "Eric",
-        lname: "Rugwizangoga",
+        fname: "GUEST",
+        lname: "user",
         phone: "0789482950",
         email: "guest@gmail.com",
         pwd: "$2a$10$rBFBTSLIrH2jTMrBPe9QEO3hSVS6UvuYvkPkA1wYzba6B0FIhI1XW", //12345678
         role: "guest",
         gender: "male",
-        location: "Gasabo",
+        location: "serena",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -27,7 +27,7 @@ module.exports = {
         pwd: "$2a$10$rBFBTSLIrH2jTMrBPe9QEO3hSVS6UvuYvkPkA1wYzba6B0FIhI1XW", //12345678
         role: "guest",
         gender: "female",
-        location: "Gikondo",
+        location: "serena",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
