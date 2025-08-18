@@ -1,3 +1,4 @@
+// src/middlewares/isLoggedin.js
 import tokenDecode from "../helpers/tokenDec";
 
 export const isLoggedin = async (req, res, next) => {
@@ -10,7 +11,7 @@ export const isLoggedin = async (req, res, next) => {
 
   try {
     const decoded = tokenDecode(token);
-    req.user = decoded.payload;
+    req.user = decoded.payload.user; // ✅ Changed this line to match verifyRole.js
     next();
   } catch (err) {
     res.status(400).json({ message: "invalid token" });

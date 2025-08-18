@@ -28,7 +28,7 @@ class GuestFeedbackController {
       } = req.body;
 
       // Verify user is a guest
-      if (req.user.user.role !== 'guest') {
+      if (req.user.role !== 'guest') { 
         return res.status(403).json({
           message: "Only guests can submit feedback through this endpoint"
         });
@@ -44,7 +44,7 @@ class GuestFeedbackController {
       }
 
       const newFeedback = await GuestFeedback.create({
-        guestId: req.user.user.id,
+        guestId: req.user.id, 
         poolId: poolId || null,
         feedbackType,
         priority,
