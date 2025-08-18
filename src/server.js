@@ -21,4 +21,4 @@ app.use(
     saveUninitialized: false,
   })
 );
-app.use(router); //all routes
+app.use(router); // BACK TO YOUR ORIGINAL - no /api prefix
