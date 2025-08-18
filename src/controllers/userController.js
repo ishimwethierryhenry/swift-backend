@@ -178,11 +178,12 @@ class UserController {
 
   // Update user role
   static async updateUserRole(req, res) {
-    try {
-      const userId = req.params.userId;
-      const newRole = req.body.newRole;
-      
-      // Validate role
+  try {
+    const userId = req.params.userId;
+    const { newRole, fname, lname, email, phone, location } = req.body;
+
+    // Validate role if provided
+    if (newRole) {
       const allowedRoles = ['admin', 'operator', 'overseer', 'guest'];
       if (!allowedRoles.includes(newRole)) {
         return res.status(400).json({
@@ -190,31 +191,38 @@ class UserController {
           message: "Invalid role specified. Allowed roles: admin, operator, overseer, guest"
         });
       }
+    }
 
-      const user = await User.findByPk(userId);
-      if (!user) {
-        return res.status(404).json({
-          status: "fail",
-          message: "User not found",
-        });
-      }
-
-      // Update user role
-      user.role = newRole;
-      await user.save();
-
-      res.status(200).json({
-        status: "success",
-        message: "User role updated successfully",
-        user: user,
-      });
-    } catch (error) {
-      res.status(500).json({
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
         status: "fail",
-        error: error.message,
+        message: "User not found",
       });
     }
+
+    // Update all provided fields
+    if (fname) user.fname = fname;
+    if (lname) user.lname = lname;
+    if (email) user.email = email;
+    if (phone) user.phone = phone;
+    if (location) user.location = location;
+    if (newRole) user.role = newRole;
+    
+    await user.save();
+
+    res.status(200).json({
+      status: "success",
+      message: "User updated successfully",
+      user: user,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "fail",
+      error: error.message,
+    });
   }
+}
 
   // Reset password
   static async resetPassword(req, res) {
