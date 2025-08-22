@@ -6,8 +6,8 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
+        type: Sequelize.STRING,  // Changed from Sequelize.UUID
+        // Removed defaultValue: Sequelize.UUIDV4
       },
       name: {
         type: Sequelize.STRING,
@@ -25,7 +25,7 @@ module.exports = {
         type: Sequelize.STRING,
       },
       assigned_to: {
-        type: Sequelize.STRING,
+        type: Sequelize.UUID,
       },
       createdAt: {
         allowNull: false,

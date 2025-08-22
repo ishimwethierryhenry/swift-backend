@@ -7,9 +7,9 @@ module.exports = {
     // Generate sample data from January 2023 to August 2025
     const data = [];
     const pools = [
-      "32109d12-ddad-4938-a37a-c17bc33aa4ba", // pool01
-      "32209d12-ddad-4633-a37a-d11bc22ba4fc", // pool702897
-      "32109d12-ddad-4938-a37a-c17bc22aa4bc", // pool02
+      "pool_01",     // ✅ UPDATED: pool01
+      "pool_702897", // ✅ UPDATED: pool702897  
+      "pool_02",     // ✅ UPDATED: pool02
     ];
     const recordedBy = "57409d12-ddad-4938-a37a-c17bc22aa4bc"; // john@gmail.com
     

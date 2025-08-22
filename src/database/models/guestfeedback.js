@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       poolId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: true,
       },
       feedbackType: {

@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
       },
       poolId: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       pH: {

@@ -12,7 +12,7 @@ module.exports = {
         defaultValue: Sequelize.UUIDV4,
       },
       poolId: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,  // Changed from Sequelize.UUID
         allowNull: false,
         references: {
           model: 'Pools',

@@ -1,50 +1,70 @@
 import { Pool, User, sequelize } from "../database/models";
 import poolSchema from "../validations/poolSchema";
+
 class PoolController {
   //create pool
   static async createPool(req, res) {
     try {
+      // Add detailed logging for debugging
+      console.log("📝 Pool creation request body:", req.body);
+      
       const { error } = poolSchema.validate(req.body);
-      if (error)
+      if (error) {
+        console.log("❌ Validation error:", error.details[0].message);
         return res
           .status(400)
           .json({ validationError: error.details[0].message });
+      }
 
       const existingPool = await Pool.findOne({
         where: { name: req.body.name },
       });
       if (existingPool) {
+        console.log("❌ Pool already exists:", req.body.name);
         return res.status(409).json({
           message: "Pool already exists !!!",
         });
       }
 
+      // Generate a unique ID for the pool
+      const poolId = `pool_${req.body.name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
+      
+      console.log("🏊 Creating pool with ID:", poolId);
+
       const newPool = await Pool.create({
+        id: poolId, // ✅ Add the generated ID
         name: req.body.name,
         depth: req.body.depth,
         l: req.body.l,
         w: req.body.w,
         location: req.body.location,
-        depth: req.body.depth,
+        // ❌ Removed duplicate depth field
         assigned_to: req.body.assigned_to,
       });
+
+      console.log("✅ Pool created successfully:", newPool.id);
 
       return res.status(201).json({
         status: "Success",
         message: "Pool created successfully !!!",
-        user: newPool,
+        pool: newPool, // ✅ Changed from 'user' to 'pool'
       });
     } catch (error) {
+      console.error("💥 Pool creation error:", error);
       return res
         .status(500)
-        .json({ message: "Internal server error", error: error.message });
+        .json({ 
+          message: "Internal server error", 
+          error: error.message,
+          details: error.stack // Add stack trace for debugging
+        });
     }
   }
 
   //single Pool
   static async getSinglePool(req, res) {
     try {
-      const singlePool = await Pool.findOne(req.params.id);
+      const singlePool = await Pool.findByPk(req.params.id); // ✅ Fixed: use findByPk instead of findOne
       if (!singlePool) {
         res.status(404).json({
           status: "fail",

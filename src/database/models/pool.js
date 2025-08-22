@@ -1,6 +1,5 @@
 "use strict";
 const { Model } = require("sequelize");
-const { v4: uuidv4 } = require("uuid");
 
 module.exports = (sequelize, DataTypes) => {
   class Pool extends Model {
@@ -11,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
   Pool.init(
     {
       id: {
-        type: DataTypes.UUID,
+        type: DataTypes.STRING,  // ✅ CHANGED from DataTypes.UUID
         primaryKey: true,
       },
       name: DataTypes.STRING,
@@ -19,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       l: DataTypes.STRING,
       w: DataTypes.STRING,
       location: DataTypes.STRING,
-      assigned_to: DataTypes.UUID,
+      assigned_to: DataTypes.UUID,  // Keep UUID for user reference
     },
     {
       sequelize,
@@ -27,8 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  Pool.beforeCreate((pool) => {
-    pool.id = uuidv4();
-  });
+  // Remove the beforeCreate hook since frontend generates the ID
   return Pool;
 };

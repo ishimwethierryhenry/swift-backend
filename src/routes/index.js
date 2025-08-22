@@ -1,82 +1,35 @@
-// import { Router } from "express";
-// import testRoutes from "./testRoutes";
-// import userRoutes from "./userRoutes";
-// import poolRoutes from "./poolRoutes";
-// const router = Router();
+// src/routes/index.js - ADD PASSWORD ROUTES TO YOUR EXISTING ROUTES
+import express from "express";
+import userRoutes from "./userRoutes.js";
+import poolRoutes from "./poolRoutes.js";
+import poolDataRoutes from "./poolDataRoutes.js";
+import deviceRoutes from "./deviceRoutes.js";
+import testRoutes from "./testRoutes.js";
+import waterQualityRoutes from "./waterQualityRoutes.js";
+import guestFeedbackRoutes from "./guestFeedbackRoutes.js";
+import twoFactorRoutes from "./twoFactorRoutes.js";
+import passwordRoutes from "./passwordRoutes.js"; // ✅ ADD THIS LINE
 
-// router.use("/test", testRoutes);
-// router.use("/users", userRoutes);
-// router.use("/pools", poolRoutes);
+const router = express.Router();
 
-// export default router;
+// Test route
+router.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Welcome to SWIFT Pool Management API",
+    status: "Server is running successfully",
+    timestamp: new Date().toISOString(),
+  });
+});
 
-// =================== UPDATE ROUTES INDEX ===================
-// Update src/routes/index.js to include water quality routes
-
-// import { Router } from "express";
-// import testRoutes from "./testRoutes";
-// import userRoutes from "./userRoutes";
-// import poolRoutes from "./poolRoutes";
-// import waterQualityRoutes from "./waterQualityRoutes";
-
-// const router = Router();
-
-// router.use("/test", testRoutes);
-// router.use("/users", userRoutes);
-// router.use("/pools", poolRoutes);
-// router.use("/water-quality", waterQualityRoutes);
-
-// export default router;
-
-
-
-
-
-// // src/routes/index.js - Updated version
-// import { Router } from "express";
-// import testRoutes from "./testRoutes";
-// import userRoutes from "./userRoutes";
-// import poolRoutes from "./poolRoutes";
-// import waterQualityRoutes from "./waterQualityRoutes";
-// import deviceRoutes from "./deviceRoutes";
-// import poolDataRoutes from "./poolDataRoutes";
-
-// const router = Router();
-
-// router.use("/test", testRoutes);
-// router.use("/users", userRoutes);
-// router.use("/pools", poolRoutes);
-// router.use("/water-quality", waterQualityRoutes);
-// router.use("/device", deviceRoutes);
-// router.use("/pool-data", poolDataRoutes);
-
-// export default router;
-
-
-
-
-
-
-// =================== UPDATE ROUTES INDEX ===================
-// Update src/routes/index.js to include feedback routes
-
-import { Router } from "express";
-import testRoutes from "./testRoutes";
-import userRoutes from "./userRoutes";
-import poolRoutes from "./poolRoutes";
-import waterQualityRoutes from "./waterQualityRoutes";
-import deviceRoutes from "./deviceRoutes";
-import poolDataRoutes from "./poolDataRoutes";
-import guestFeedbackRoutes from "./guestFeedbackRoutes";
-
-const router = Router();
-
-router.use("/test", testRoutes);
+// API routes
 router.use("/users", userRoutes);
 router.use("/pools", poolRoutes);
-router.use("/water-quality", waterQualityRoutes);
-router.use("/device", deviceRoutes);
 router.use("/pool-data", poolDataRoutes);
-router.use("/feedback", guestFeedbackRoutes);
+router.use("/devices", deviceRoutes);
+router.use("/test", testRoutes);
+router.use("/water-quality", waterQualityRoutes);
+router.use("/guest-feedback", guestFeedbackRoutes);
+router.use("/2fa", twoFactorRoutes);
+router.use("/password", passwordRoutes); // ✅ ADD THIS LINE
 
 export default router;

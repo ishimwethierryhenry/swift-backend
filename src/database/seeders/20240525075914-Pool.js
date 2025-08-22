@@ -1,3 +1,52 @@
+// "use strict";
+
+// /** @type {import('sequelize-cli').Migration} */
+// module.exports = {
+//   async up(queryInterface, Sequelize) {
+//     await queryInterface.bulkInsert("Pools", [
+//       {
+//         id: "32109d12-ddad-4938-a37a-c17bc33aa4ba",
+//         name: "pool01",
+//         depth: "1.2m",
+//         l: "9m",
+//         w: "4.5m",
+//         location: "serena",
+//         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       },
+//       {
+//         id: "32209d12-ddad-4633-a37a-d11bc22ba4fc",
+//         name: "pool702897",
+//         depth: "1.2m",
+//         l: "12m",
+//         w: "6m",
+//         location: "serena",
+//         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       },
+//       {
+//         id: "32109d12-ddad-4938-a37a-c17bc22aa4bc",
+//         name: "pool02",
+//         depth: "1.2m",
+//         l: "12m",
+//         w: "6m",
+//         location: "serena",
+//         assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+//         createdAt: new Date(),
+//         updatedAt: new Date(),
+//       },
+//     ]);
+//   },
+
+//   async down(queryInterface, Sequelize) {
+//     await queryInterface.bulkDelete("Pools", null, {});
+//   },
+// };
+
+
+
 "use strict";
 
 /** @type {import('sequelize-cli').Migration} */
@@ -5,35 +54,35 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert("Pools", [
       {
-        id: "32109d12-ddad-4938-a37a-c17bc33aa4ba",
+        id: "pool_01", // Changed from UUID to simple string
         name: "pool01",
         depth: "1.2m",
         l: "9m",
         w: "4.5m",
         location: "serena",
-        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", // Keep UUID for user reference
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: "32209d12-ddad-4633-a37a-d11bc22ba4fc",
+        id: "pool_702897", // Changed from UUID to simple string
         name: "pool702897",
         depth: "1.2m",
         l: "12m",
         w: "6m",
         location: "serena",
-        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", // Keep UUID for user reference
         createdAt: new Date(),
         updatedAt: new Date(),
-      },
+      },
       {
-        id: "32109d12-ddad-4938-a37a-c17bc22aa4bc",
+        id: "pool_02", // Changed from UUID to simple string
         name: "pool02",
         depth: "1.2m",
         l: "12m",
         w: "6m",
         location: "serena",
-        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", //john@gmail.com
+        assigned_to: "57409d12-ddad-4938-a37a-c17bc22aa4bc", // Keep UUID for user reference
         createdAt: new Date(),
         updatedAt: new Date(),
       },

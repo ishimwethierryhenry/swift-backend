@@ -1,6 +1,6 @@
-// =================== GUEST FEEDBACK SYSTEM - BACKEND ===================
+// =================== UPDATED MIGRATION FILES ===================
 
-// 1. DATABASE MIGRATION - Create Feedback Table
+// 1. FIXED: GuestFeedback Migration - poolId changed to STRING
 // src/database/migrations/20241225000002-create-guest-feedback.js
 "use strict";
 
@@ -25,7 +25,7 @@ module.exports = {
         onDelete: 'CASCADE'
       },
       poolId: {
-        type: Sequelize.UUID,
+        type: Sequelize.STRING,  // ✅ CHANGED from UUID to STRING
         allowNull: true, // Can be null for general feedback
         references: {
           model: 'Pools',
