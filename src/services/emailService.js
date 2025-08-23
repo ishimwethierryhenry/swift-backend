@@ -23,7 +23,7 @@ class EmailService {
       console.log('- First Name:', firstName);
 
       const resetUrl = `${process.env.FRONTEND_URL || 'https://swift-jade.vercel.app'}/reset-password/${resetToken}`;
-    //   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+    //   const resetUrl = `${process.env.FRONTEND_URL || 'https://swift-jade.vercel.app'}/reset-password/${resetToken}`;
       console.log('- Reset URL:', resetUrl);
 
       const msg = {

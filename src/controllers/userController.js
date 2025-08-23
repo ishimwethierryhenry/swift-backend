@@ -73,104 +73,85 @@ class UserController {
   }
 
   //login - ✅ ENHANCED WITH SECURITY FEATURES
-  static async login(req, res) {
-    try {
-      const { email, pwd } = req.body;
+  // src/controllers/userController.js - Updated login method (around line 70)
 
-      const user = await User.findOne({ where: { email } });
+static async login(req, res) {
+  try {
+    const { email, pwd } = req.body;
 
-      if (!user) return res.status(400).json({ message: "user not found" });
+    const user = await User.findOne({ where: { email } });
 
-      // ✅ CHECK IF ACCOUNT IS LOCKED
-      if (user.lockedUntil && new Date() < user.lockedUntil) {
-        const lockTimeRemaining = Math.ceil((user.lockedUntil - new Date()) / (1000 * 60)); // minutes
-        return res.status(423).json({ 
-          message: `Account is locked. Try again in ${lockTimeRemaining} minutes.`,
-          lockedUntil: user.lockedUntil
-        });
-      }
+    if (!user) return res.status(400).json({ message: "user not found" });
 
-      if (await user.checkPassword(pwd)) {
-        // ✅ RESET LOGIN ATTEMPTS ON SUCCESSFUL LOGIN
-        await user.update({
-          loginAttempts: 0,
-          lockedUntil: null,
-          lastLoginAt: new Date()
-        });
-
-        const payload = {
-          user,
-        };
-
-        const token = await generateToken(payload, "1d");
-
-        // ✅ STORE USER INFO IN LOCALSTORAGE
-        const userInfo = {
-          id: user.id,
-          fname: user.fname,
-          lname: user.lname,
-          email: user.email,
-          role: user.role,
-          location: user.location,
-          isFirstLogin: user.isFirstLogin, // ✅ IMPORTANT FOR FRONTEND
-          twoFactorEnabled: user.twoFactorEnabled,
-          requiresPasswordChange: user.isFirstLogin
-        };
-
-        return res.status(200).json({ 
-          token, 
-          message: "login successful",
-          user: userInfo
-        });
-      } else {
-        // ✅ INCREMENT LOGIN ATTEMPTS ON FAILED LOGIN
-        const newAttempts = user.loginAttempts + 1;
-        const updates = { loginAttempts: newAttempts };
-
-        // Lock account after 5 failed attempts for 30 minutes
-        if (newAttempts >= 5) {
-          updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
-          
-          // Send security alert email
-          if (user.securityNotifications) {
-            setImmediate(async () => {
-              try {
-                await EmailService.sendSuspiciousActivityAlert({
-                  user: {
-                    email: user.email,
-                    fname: user.fname,
-                    lname: user.lname
-                  },
-                  activity: {
-                    type: 'Multiple failed login attempts',
-                    timestamp: new Date().toLocaleString(),
-                    ipAddress: req.ip || req.connection.remoteAddress,
-                    location: 'Unknown',
-                    device: req.get('User-Agent') || 'Unknown'
-                  }
-                });
-              } catch (emailError) {
-                console.error('Failed to send suspicious activity alert:', emailError);
-              }
-            });
-          }
-        }
-
-        await user.update(updates);
-
-        const remainingAttempts = Math.max(0, 5 - newAttempts);
-        return res.status(400).json({ 
-          message: newAttempts >= 5 
-            ? "Account locked due to too many failed attempts. Try again in 30 minutes."
-            : `Invalid credentials. ${remainingAttempts} attempts remaining.`,
-          remainingAttempts,
-          lockedUntil: updates.lockedUntil
-        });
-      }
-    } catch (error) {
-      return res.status(500).json({ message: "login failed" });
+    // ✅ CHECK IF ACCOUNT IS LOCKED
+    if (user.lockedUntil && new Date() < user.lockedUntil) {
+      const lockTimeRemaining = Math.ceil((user.lockedUntil - new Date()) / (1000 * 60)); // minutes
+      return res.status(423).json({ 
+        message: `Account is locked. Try again in ${lockTimeRemaining} minutes.`,
+        lockedUntil: user.lockedUntil
+      });
     }
+
+    if (await user.checkPassword(pwd)) {
+      // ✅ RESET LOGIN ATTEMPTS ON SUCCESSFUL LOGIN
+      await user.update({
+        loginAttempts: 0,
+        lockedUntil: null,
+        lastLoginAt: new Date()
+      });
+
+      const payload = {
+        user,
+      };
+
+      const token = await generateToken(payload, "1d");
+
+      // ✅ ENHANCED USER INFO WITH FIRST LOGIN FLAG
+      const userInfo = {
+        id: user.id,
+        fname: user.fname,
+        lname: user.lname,
+        email: user.email,
+        role: user.role,
+        location: user.location,
+        isFirstLogin: user.isFirstLogin, // 🔥 CRITICAL FOR FRONTEND
+        twoFactorEnabled: user.twoFactorEnabled,
+        requiresPasswordChange: user.isFirstLogin, // 🔥 EXPLICIT FLAG
+        passwordChangedAt: user.passwordChangedAt,
+        lastLoginAt: user.lastLoginAt
+      };
+
+      return res.status(200).json({ 
+        token, 
+        message: user.isFirstLogin ? "First login detected - password change required" : "login successful",
+        user: userInfo,
+        // 🔥 ADD EXPLICIT REDIRECT INSTRUCTION FOR FRONTEND
+        redirectTo: user.isFirstLogin ? "/change-password" : null
+      });
+    } else {
+      // Handle failed login attempts...
+      const newAttempts = user.loginAttempts + 1;
+      const updates = { loginAttempts: newAttempts };
+
+      if (newAttempts >= 5) {
+        updates.lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+      }
+
+      await user.update(updates);
+
+      const remainingAttempts = Math.max(0, 5 - newAttempts);
+      return res.status(400).json({ 
+        message: newAttempts >= 5 
+          ? "Account locked due to too many failed attempts. Try again in 30 minutes."
+          : `Invalid credentials. ${remainingAttempts} attempts remaining.`,
+        remainingAttempts,
+        lockedUntil: updates.lockedUntil
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "login failed" });
   }
+}
 
   //single user
   static async getSingleUser(req, res) {

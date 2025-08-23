@@ -47,7 +47,7 @@ class PasswordController {
 
       console.log('Reset token generated:', token);
       console.log('Reset URL would be:', `https://swift-jade.vercel.app/reset-password/${token}`);
-      // console.log('Reset URL would be:', `http://localhost:5173/reset-password/${token}`);
+      // console.log('Reset URL would be:', `https://swift-jade.vercel.app/reset-password/${token}`);
 
 
       // FIXED: Call email service with correct parameters
@@ -137,11 +137,38 @@ class PasswordController {
       }
 
       // Validate password strength
-      const { error } = passwordSchema.validate({ password: newPassword });
-      if (error) {
+            if (newPassword.length < 8) {
         return res.status(400).json({
           status: "error",
-          message: error.details[0].message
+          message: "Password must be at least 8 characters long"
+        });
+      }
+      
+      if (!/(?=.*[a-z])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one lowercase letter"
+        });
+      }
+      
+      if (!/(?=.*[A-Z])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one uppercase letter"
+        });
+      }
+      
+      if (!/(?=.*\d)/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one number"
+        });
+      }
+      
+      if (!/(?=.*[@$!%*?&])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one special character (@$!%*?&)"
         });
       }
 
@@ -224,11 +251,38 @@ class PasswordController {
       }
 
       // Validate password strength
-      const { error } = passwordSchema.validate({ password: newPassword });
-      if (error) {
+            if (newPassword.length < 8) {
         return res.status(400).json({
           status: "error",
-          message: error.details[0].message
+          message: "Password must be at least 8 characters long"
+        });
+      }
+      
+      if (!/(?=.*[a-z])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one lowercase letter"
+        });
+      }
+      
+      if (!/(?=.*[A-Z])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one uppercase letter"
+        });
+      }
+      
+      if (!/(?=.*\d)/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one number"
+        });
+      }
+      
+      if (!/(?=.*[@$!%*?&])/.test(newPassword)) {
+        return res.status(400).json({
+          status: "error",
+          message: "Password must contain at least one special character (@$!%*?&)"
         });
       }
 
@@ -297,83 +351,126 @@ class PasswordController {
   }
 
   // Force password change for first login
-  static async forcePasswordChange(req, res) {
-    try {
-      const { newPassword, confirmPassword } = req.body;
-      const userId = req.user.id;
+  // Updated forcePasswordChange method in passwordController.js
 
-      // Validate passwords match
-      if (newPassword !== confirmPassword) {
-        return res.status(400).json({
-          status: "error",
-          message: "Passwords do not match"
-        });
-      }
+// Force password change for first login
+static async forcePasswordChange(req, res) {
+  try {
+    const { newPassword, confirmPassword } = req.body;
+    const userId = req.user.id;
 
-      // Validate password strength
-      const { error } = passwordSchema.validate({ password: newPassword });
-      if (error) {
-        return res.status(400).json({
-          status: "error",
-          message: error.details[0].message
-        });
-      }
+    console.log('🔧 Force password change called for user:', userId);
+    console.log('🔧 Request body received:', { newPassword: newPassword ? '[PROVIDED]' : '[MISSING]', confirmPassword: confirmPassword ? '[PROVIDED]' : '[MISSING]' });
 
-      // Get user
-      const user = await User.findByPk(userId);
-      if (!user) {
-        return res.status(404).json({
-          status: "error",
-          message: "User not found"
-        });
-      }
-
-      // Check if user really needs to change password
-      if (!user.isFirstLogin) {
-        return res.status(400).json({
-          status: "error",
-          message: "Password change not required"
-        });
-      }
-
-      // Check if new password is same as default
-      const isSamePassword = await user.checkPassword(newPassword);
-      if (isSamePassword) {
-        return res.status(400).json({
-          status: "error",
-          message: "New password must be different from the default password"
-        });
-      }
-
-      // Hash new password
-      const salt = await bcrypt.genSalt(12);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-      // Update user password
-      await user.update({
-        pwd: hashedPassword,
-        passwordChangedAt: new Date(),
-        isFirstLogin: false,
-        lastLoginAt: new Date()
-      });
-
-      console.log(`✅ First login password change completed for user ${userId}`);
-
-      return res.status(200).json({
-        status: "success",
-        message: "Password has been set successfully. Welcome to SWIFT!",
-        isFirstLogin: false
-      });
-
-    } catch (error) {
-      console.error("Error in force password change:", error);
-      return res.status(500).json({
+    // Basic validation
+    if (!newPassword || !confirmPassword) {
+      return res.status(400).json({
         status: "error",
-        message: "Internal server error",
-        error: error.message
+        message: "New password and confirmation are required"
       });
     }
+
+    // Validate passwords match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "Passwords do not match"
+      });
+    }
+
+    // Manual password strength validation (instead of using Joi schema)
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must be at least 8 characters long"
+      });
+    }
+
+    if (!/(?=.*[a-z])/.test(newPassword)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must contain at least one lowercase letter"
+      });
+    }
+
+    if (!/(?=.*[A-Z])/.test(newPassword)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must contain at least one uppercase letter"
+      });
+    }
+
+    if (!/(?=.*\d)/.test(newPassword)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must contain at least one number"
+      });
+    }
+
+    if (!/(?=.*[@$!%*?&])/.test(newPassword)) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password must contain at least one special character (@$!%*?&)"
+      });
+    }
+
+    // Get user
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({
+        status: "error",
+        message: "User not found"
+      });
+    }
+
+    console.log('🔧 User found:', user.fname, user.lname, 'isFirstLogin:', user.isFirstLogin);
+
+    // Check if user really needs to change password
+    if (!user.isFirstLogin) {
+      return res.status(400).json({
+        status: "error",
+        message: "Password change not required"
+      });
+    }
+
+    // Check if new password is same as default
+    const isSamePassword = await user.checkPassword(newPassword);
+    if (isSamePassword) {
+      return res.status(400).json({
+        status: "error",
+        message: "New password must be different from the default password"
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update user password
+    await user.update({
+      pwd: hashedPassword,
+      passwordChangedAt: new Date(),
+      isFirstLogin: false,
+      lastLoginAt: new Date()
+    });
+
+    console.log(`✅ First login password change completed for user ${userId}`);
+
+    return res.status(200).json({
+      status: "success",
+      message: "Password has been set successfully. Welcome to SWIFT!",
+      isFirstLogin: false
+    });
+
+  } catch (error) {
+    console.error("❌ Error in force password change:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+      error: error.message
+    });
   }
+}
 
   // Check password requirements
   static async checkPasswordRequirements(req, res) {
