@@ -3,7 +3,7 @@
 import Joi from "joi";
 
 const feedbackSchema = Joi.object({
-  poolId: Joi.string().uuid().optional().allow(null).messages({
+  poolId: Joi.string().optional().allow(null).messages({
     "string.guid": "Pool ID must be a valid UUID"
   }),
 

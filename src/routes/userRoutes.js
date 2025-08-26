@@ -11,6 +11,9 @@ userRoutes.post("/signup", UserController.createUser);
 userRoutes.post("/login", UserController.login);
 userRoutes.put("/reset", UserController.resetPassword);
 
+// 🆕 NEW: Complete login after 2FA verification (public route)
+userRoutes.post("/complete-2fa-login", UserController.complete2FALogin);
+
 // Admin only routes
 userRoutes.get(
   "/user/:id",

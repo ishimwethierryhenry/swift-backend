@@ -25,7 +25,7 @@ router.get("/", (req, res) => {
 router.use("/users", userRoutes);
 router.use("/pools", poolRoutes);
 router.use("/pool-data", poolDataRoutes);
-router.use("/devices", deviceRoutes);
+router.use("/device", deviceRoutes);
 router.use("/test", testRoutes);
 router.use("/water-quality", waterQualityRoutes);
 router.use("/guest-feedback", guestFeedbackRoutes);

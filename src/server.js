@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 import express from "express";
 import session from "cookie-session";
 import cors from "cors";
-import router from "./routes";
+import router from "./routes/index.js"; // Correct relative path
 
 dotenv.config();
 export const app = express();
@@ -21,4 +21,5 @@ app.use(
     saveUninitialized: false,
   })
 );
-app.use(router); // BACK TO YOUR ORIGINAL - no /api prefix
+
+app.use("/", router);

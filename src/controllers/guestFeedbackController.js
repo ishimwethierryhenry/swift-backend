@@ -70,7 +70,7 @@ class GuestFeedbackController {
         ]
       });
 
-      console.log(`📝 New feedback submitted by guest: ${req.user.user.fname} ${req.user.user.lname}`);
+      console.log(`📝 New feedback submitted by guest: ${req.user.fname} ${req.user.lname}`);
       console.log(`📋 Type: ${feedbackType}, Priority: ${priority}`);
 
       // Send email notification to admins (don't wait for it)
@@ -370,7 +370,7 @@ class GuestFeedbackController {
   // Get guest's own feedback
   static async getMyFeedback(req, res) {
     try {
-      const guestId = req.user.user.id;
+      const guestId = req.user.id;
 
       const feedback = await GuestFeedback.findAll({
         where: { guestId },

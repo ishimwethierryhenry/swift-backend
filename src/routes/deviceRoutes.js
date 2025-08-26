@@ -1,12 +1,13 @@
-// src/routes/deviceRoutes.js
 import express from "express";
-import DeviceController from "../controllers/deviceController";
-import verifyRole from "../middlewares/verifyRole";
-import { isLoggedin } from "../middlewares/isLoggedin";
+import DeviceController from "../controllers/deviceController.js";
+import verifyRole from "../middlewares/verifyRole.js";      // Add .js
+import { isLoggedin } from "../middlewares/isLoggedin.js";  // Add .js
 
 const deviceRoutes = express.Router();
 
-// Start device recording (admin and operators only)
+// Add debug logging
+console.log("✅ Device routes file loaded");
+
 deviceRoutes.post(
   "/start-recording",
   isLoggedin,
@@ -14,19 +15,19 @@ deviceRoutes.post(
   DeviceController.startRecording
 );
 
-// Stop device recording (admin and operators only)
 deviceRoutes.post(
-  "/stop-recording",
+  "/stop-recording", 
   isLoggedin,
   verifyRole("admin,operator", true),
   DeviceController.stopRecording
 );
 
-// Get device status (all authenticated users)
 deviceRoutes.get(
   "/status/:poolId",
   isLoggedin,
   DeviceController.getDeviceStatus
 );
+
+console.log("✅ Device routes registered");
 
 export default deviceRoutes;

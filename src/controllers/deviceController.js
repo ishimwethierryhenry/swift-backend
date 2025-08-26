@@ -1,5 +1,5 @@
-// src/controllers/deviceController.js
-import { Pool, User } from "../database/models";
+// src/controllers/deviceController.js - UPDATED FOR UUID COMPATIBILITY
+import { Pool, User } from "../database/models/index.js";
 
 class DeviceController {
   // Start device recording for pool testing
@@ -15,16 +15,38 @@ class DeviceController {
         });
       }
 
-      // Verify pool exists
-      const pool = await Pool.findByPk(poolId);
-      if (!pool) {
-        return res.status(404).json({
-          status: "error",
-          message: "Pool not found"
+      // Find pool by ID or name (handle both UUID and string IDs)
+      let pool;
+      
+      // If poolId looks like a UUID, search by ID
+      if (poolId.includes('-') || poolId.length === 36) {
+        pool = await Pool.findByPk(poolId);
+      } else {
+        // Otherwise search by name or custom ID
+        pool = await Pool.findOne({ 
+          where: { 
+            $or: [
+              { id: poolId },
+              { name: poolName }
+            ]
+          }
         });
       }
 
-      // Verify user exists
+      // If pool not found by ID, try by name
+      if (!pool) {
+        pool = await Pool.findOne({ where: { name: poolName } });
+      }
+
+      // If still not found, return appropriate error
+      if (!pool) {
+        return res.status(404).json({
+          status: "error",
+          message: `Pool not found: ${poolName} (${poolId})`
+        });
+      }
+
+      // Find user by ID (handle UUID)
       const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({
@@ -41,26 +63,20 @@ class DeviceController {
         });
       }
 
-      // Log the recording start (you can expand this to actually control devices)
+      // Log the recording start
       console.log(`🔴 Recording started for pool: ${poolName} by user: ${user.fname} ${user.lname}`);
       console.log(`📊 Test initiated: ${testInitiated} at ${timestamp}`);
-
-      // Here you would typically:
-      // 1. Send commands to your IoT devices to start recording
-      // 2. Initialize data collection processes
-      // 3. Set up MQTT subscriptions
-      // 4. Store recording session info in database
 
       return res.status(200).json({
         status: "success",
         message: "Device recording started successfully",
         data: {
-          poolId,
-          poolName,
+          poolId: pool.id, // Return actual database pool ID
+          poolName: pool.name,
           recordingStarted: true,
           timestamp: timestamp || new Date().toISOString(),
           userId,
-          sessionId: `session_${poolId}_${Date.now()}` // Generate unique session ID
+          sessionId: `session_${pool.id}_${Date.now()}`
         }
       });
 
@@ -87,12 +103,30 @@ class DeviceController {
         });
       }
 
-      // Verify pool exists
-      const pool = await Pool.findByPk(poolId);
+      // Find pool (similar logic as startRecording)
+      let pool;
+      
+      if (poolId.includes('-') || poolId.length === 36) {
+        pool = await Pool.findByPk(poolId);
+      } else {
+        pool = await Pool.findOne({ 
+          where: { 
+            $or: [
+              { id: poolId },
+              { name: poolName }
+            ]
+          }
+        });
+      }
+
+      if (!pool) {
+        pool = await Pool.findOne({ where: { name: poolName } });
+      }
+
       if (!pool) {
         return res.status(404).json({
           status: "error",
-          message: "Pool not found"
+          message: `Pool not found: ${poolName}`
         });
       }
 
@@ -105,21 +139,14 @@ class DeviceController {
         });
       }
 
-      // Log the recording stop
       console.log(`⏹️ Recording stopped for pool: ${poolName} by user: ${user.fname} ${user.lname}`);
-
-      // Here you would typically:
-      // 1. Send commands to your IoT devices to stop recording
-      // 2. Finalize data collection processes
-      // 3. Close MQTT connections
-      // 4. Clean up recording session
 
       return res.status(200).json({
         status: "success",
         message: "Device recording stopped successfully",
         data: {
-          poolId,
-          poolName,
+          poolId: pool.id,
+          poolName: pool.name,
           recordingStopped: true,
           timestamp: new Date().toISOString(),
           userId
@@ -141,8 +168,22 @@ class DeviceController {
     try {
       const { poolId } = req.params;
 
-      // Verify pool exists
-      const pool = await Pool.findByPk(poolId);
+      // Find pool with flexible ID matching
+      let pool;
+      
+      if (poolId.includes('-') || poolId.length === 36) {
+        pool = await Pool.findByPk(poolId);
+      } else {
+        pool = await Pool.findOne({ 
+          where: { 
+            $or: [
+              { id: poolId },
+              { name: poolId }
+            ]
+          }
+        });
+      }
+
       if (!pool) {
         return res.status(404).json({
           status: "error",
@@ -150,10 +191,9 @@ class DeviceController {
         });
       }
 
-      // Here you would typically check actual device status
-      // For now, return mock status
+      // Mock device status
       const deviceStatus = {
-        poolId,
+        poolId: pool.id,
         poolName: pool.name,
         isOnline: true,
         isRecording: false,

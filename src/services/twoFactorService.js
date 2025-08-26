@@ -346,6 +346,67 @@ class TwoFactorService {
     }
   }
 
+  // Add this method to disable 2FA with proper verification
+static async disable2FA(userId, password) {
+  try {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!user.twoFactorEnabled) {
+      throw new Error('2FA is not enabled for this user');
+    }
+
+    // Verify password if provided
+    if (password) {
+      const isPasswordValid = await user.checkPassword(password);
+      if (!isPasswordValid) {
+        throw new Error('Invalid password');
+      }
+    }
+
+    // Disable 2FA and clear all related data
+    await user.update({
+      twoFactorEnabled: false,
+      twoFactorSecret: null,
+      backupCodes: null,
+      trustedDevices: [] // Clear trusted devices too
+    });
+
+    // Invalidate any existing 2FA tokens
+    await TwoFactorToken.update(
+      { isUsed: true, usedAt: new Date() },
+      { where: { userId: userId, isUsed: false } }
+    );
+
+    console.log(`🔒 2FA disabled for user ${userId}`);
+
+    return { success: true };
+
+  } catch (error) {
+    console.error('Error disabling 2FA:', error);
+    throw error;
+  }
+}
+
+// Add this method for better TOTP verification with your existing structure
+static async verifyCurrentTOTP(userId, token) {
+  try {
+    const user = await User.findByPk(userId);
+    if (!user || !user.twoFactorEnabled || !user.twoFactorSecret) {
+      throw new Error('2FA is not enabled for this user');
+    }
+
+    // Use your existing verifyTOTP method
+    return this.verifyTOTP(token, user.twoFactorSecret, 2); // Allow 2-step window
+
+  } catch (error) {
+    console.error('Error verifying current TOTP:', error);
+    return false;
+  }
+}
+
   // Remove trusted device
   static async removeTrustedDevice(userId, deviceFingerprint) {
     try {
