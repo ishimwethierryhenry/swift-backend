@@ -1,5 +1,5 @@
-// =================== UPDATED FEEDBACK CONTROLLER WITH PROPER IMPORTS ===================
-// src/controllers/guestFeedbackController.js - Complete working version
+// =================== COMPLETELY FIXED FEEDBACK CONTROLLER ===================
+// src/controllers/guestFeedbackController.js - Fixed user access inconsistencies
 
 import { GuestFeedback, User, Pool, sequelize } from "../database/models";
 import { Op } from "sequelize";
@@ -7,7 +7,7 @@ import feedbackSchema from "../validations/feedbackSchema";
 import EmailService from "../services/emailService";
 
 class GuestFeedbackController {
-  // Submit feedback (guests only) - Updated with email notification
+  // Submit feedback (guests only) - Fixed user access
   static async submitFeedback(req, res) {
     try {
       const { error } = feedbackSchema.validate(req.body);
@@ -27,8 +27,21 @@ class GuestFeedbackController {
         isAnonymous 
       } = req.body;
 
+      // FIXED: Consistent user access pattern
+      const userId = req.user.user ? req.user.user.id : req.user.id;
+      const userRole = req.user.user ? req.user.user.role : req.user.role;
+      const userFname = req.user.user ? req.user.user.fname : req.user.fname;
+      const userLname = req.user.user ? req.user.user.lname : req.user.lname;
+
+      console.log('DEBUG - Submit Feedback User:', {
+        userId,
+        userRole,
+        userName: `${userFname} ${userLname}`,
+        reqUser: req.user
+      });
+
       // Verify user is a guest
-      if (req.user.role !== 'guest') { 
+      if (userRole !== 'guest') { 
         return res.status(403).json({
           message: "Only guests can submit feedback through this endpoint"
         });
@@ -44,7 +57,7 @@ class GuestFeedbackController {
       }
 
       const newFeedback = await GuestFeedback.create({
-        guestId: req.user.id, 
+        guestId: userId, // FIXED: Use consistent userId
         poolId: poolId || null,
         feedbackType,
         priority,
@@ -53,6 +66,8 @@ class GuestFeedbackController {
         rating: rating || null,
         isAnonymous: isAnonymous || false,
       });
+
+      console.log('DEBUG - Created feedback with guestId:', userId);
 
       // Get the feedback with associations for response
       const feedbackWithDetails = await GuestFeedback.findByPk(newFeedback.id, {
@@ -70,19 +85,21 @@ class GuestFeedbackController {
         ]
       });
 
-      console.log(`📝 New feedback submitted by guest: ${req.user.fname} ${req.user.lname}`);
-      console.log(`📋 Type: ${feedbackType}, Priority: ${priority}`);
+      console.log(`New feedback submitted by guest: ${userFname} ${userLname}`);
+      console.log(`Type: ${feedbackType}, Priority: ${priority}`);
 
       // Send email notification to admins (don't wait for it)
       setImmediate(async () => {
         try {
-          const adminEmails = await EmailService.getAdminEmails();
-          if (adminEmails.length > 0) {
-            await EmailService.sendFeedbackNotificationToAdmin({
-              feedback: feedbackWithDetails,
-              guest: feedbackWithDetails.guest,
-              pool: feedbackWithDetails.pool
-            }, adminEmails);
+          if (EmailService && typeof EmailService.getAdminEmails === 'function') {
+            const adminEmails = await EmailService.getAdminEmails();
+            if (adminEmails && adminEmails.length > 0) {
+              await EmailService.sendFeedbackNotificationToAdmin({
+                feedback: feedbackWithDetails,
+                guest: feedbackWithDetails.guest,
+                pool: feedbackWithDetails.pool
+              }, adminEmails);
+            }
           }
         } catch (emailError) {
           console.error('Failed to send email notification:', emailError);
@@ -279,7 +296,7 @@ class GuestFeedbackController {
     }
   }
 
-  // Respond to feedback (admins only) - Updated with email notification
+  // Respond to feedback (admins only) - Fixed user access
   static async respondToFeedback(req, res) {
     try {
       const { feedbackId } = req.params;
@@ -305,10 +322,15 @@ class GuestFeedbackController {
         return res.status(404).json({ message: "Feedback not found" });
       }
 
+      // FIXED: Consistent user access pattern
+      const adminUserId = req.user.user ? req.user.user.id : req.user.id;
+      const adminFname = req.user.user ? req.user.user.fname : req.user.fname;
+      const adminLname = req.user.user ? req.user.user.lname : req.user.lname;
+
       // Update feedback with admin response
       feedback.adminResponse = adminResponse;
       feedback.status = status;
-      feedback.respondedBy = req.user.user.id;
+      feedback.respondedBy = adminUserId;
       feedback.respondedAt = new Date();
 
       await feedback.save();
@@ -334,18 +356,20 @@ class GuestFeedbackController {
         ]
       });
 
-      console.log(`✅ Feedback ${feedbackId} responded to by admin: ${req.user.user.fname} ${req.user.user.lname}`);
+      console.log(`Feedback ${feedbackId} responded to by admin: ${adminFname} ${adminLname}`);
 
       // Send email notification to guest (don't wait for it)
       setImmediate(async () => {
         try {
           if (!feedback.isAnonymous && feedback.guest?.email) {
-            await EmailService.sendFeedbackResponseToGuest({
-              feedback: updatedFeedback,
-              guest: feedback.guest,
-              adminResponse,
-              adminName: `${req.user.user.fname} ${req.user.user.lname}`
-            });
+            if (EmailService && typeof EmailService.sendFeedbackResponseToGuest === 'function') {
+              await EmailService.sendFeedbackResponseToGuest({
+                feedback: updatedFeedback,
+                guest: feedback.guest,
+                adminResponse,
+                adminName: `${adminFname} ${adminLname}`
+              });
+            }
           }
         } catch (emailError) {
           console.error('Failed to send response email:', emailError);
@@ -367,13 +391,36 @@ class GuestFeedbackController {
     }
   }
 
-  // Get guest's own feedback
+  // FIXED: Get guest's own feedback with comprehensive debugging
   static async getMyFeedback(req, res) {
+    console.log('🚨 GET MY FEEDBACK METHOD CALLED 🚨');
     try {
-      const guestId = req.user.id;
+      console.log('=== GET MY FEEDBACK DEBUG ===');
+      
+      // FIXED: Consistent user access pattern
+      const userId = req.user.user ? req.user.user.id : req.user.id;
+      const userRole = req.user.user ? req.user.user.role : req.user.role;
+      
+      console.log('User from token:', req.user);
+      console.log('Extracted userId:', userId);
+      console.log('User role:', userRole);
+      console.log('UserId type:', typeof userId);
 
+      // First, let's see ALL feedback in the database
+      const allFeedback = await GuestFeedback.findAll({
+        attributes: ['id', 'guestId', 'title', 'createdAt'],
+        raw: true
+      });
+      console.log('All feedback in database:', allFeedback);
+      console.log('Guest IDs in database:', allFeedback.map(f => ({ 
+        guestId: f.guestId, 
+        type: typeof f.guestId 
+      })));
+      console.log('Looking for guestId:', userId, 'Type:', typeof userId);
+
+      // Query for user's feedback
       const feedback = await GuestFeedback.findAll({
-        where: { guestId },
+        where: { guestId: userId }, // FIXED: Use consistent userId
         include: [
           {
             model: User,
@@ -389,12 +436,24 @@ class GuestFeedbackController {
         order: [['createdAt', 'DESC']]
       });
 
-      return res.status(200).json({
+      console.log('Found feedback count:', feedback.length);
+      console.log('Found feedback:', feedback.map(f => ({
+        id: f.id,
+        guestId: f.guestId,
+        title: f.title,
+        createdAt: f.createdAt
+      })));
+
+      const responseData = {
         status: "success",
         data: feedback
-      });
+      };
+      console.log('Sending response with data count:', responseData.data.length);
+
+      return res.status(200).json(responseData);
     } catch (error) {
       console.error("Error getting user feedback:", error);
+      console.error("Error stack:", error.stack);
       return res.status(500).json({ 
         message: "Internal server error", 
         error: error.message 

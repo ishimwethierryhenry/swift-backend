@@ -355,6 +355,60 @@ class WaterQualityController {
     }
   }
 
+  // Add this method to WaterQualityController class
+static async getMonthlyData(req, res) {
+  try {
+    const { poolId, year = new Date().getFullYear() } = req.query;
+
+    let whereClause = {
+      recordedAt: {
+        [Op.gte]: new Date(`${year}-01-01`),
+        [Op.lt]: new Date(`${parseInt(year) + 1}-01-01`)
+      }
+    };
+
+    if (poolId && poolId !== 'all') {
+      whereClause.poolId = poolId;
+    }
+
+    const monthlyData = await WaterQualityData.findAll({
+      where: whereClause,
+      attributes: [
+        [sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "recordedAt"')), 'month'],
+        [sequelize.fn('AVG', sequelize.col('pH')), 'avgpH'],
+        [sequelize.fn('AVG', sequelize.col('turbidity')), 'avgTurbidity'],
+        [sequelize.fn('AVG', sequelize.col('conductivity')), 'avgConductivity'],
+        [sequelize.fn('COUNT', sequelize.literal('CASE WHEN "isOptimal" = true THEN 1 END')), 'optimalCount'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'totalCount'],
+      ],
+      group: [sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "recordedAt"'))],
+      order: [[sequelize.fn('EXTRACT', sequelize.literal('MONTH FROM "recordedAt"')), 'ASC']],
+      raw: true
+    });
+
+    const processedData = monthlyData.map(item => ({
+      month: parseInt(item.month),
+      monthName: new Date(year, item.month - 1).toLocaleString('default', { month: 'long' }),
+      avgpH: parseFloat(item.avgpH || 0).toFixed(2),
+      avgTurbidity: parseFloat(item.avgTurbidity || 0).toFixed(2),
+      avgConductivity: parseFloat(item.avgConductivity || 0).toFixed(2),
+      optimalCount: parseInt(item.optimalCount),
+      totalCount: parseInt(item.totalCount),
+      optimalPercentage: item.totalCount > 0 ? ((item.optimalCount / item.totalCount) * 100).toFixed(1) : 0
+    }));
+
+    return res.status(200).json({
+      status: "success",
+      data: processedData
+    });
+  } catch (error) {
+    return res.status(500).json({ 
+      message: "Internal server error", 
+      error: error.message 
+    });
+  }
+}
+
   // Delete water quality record
   static async deleteRecord(req, res) {
     try {

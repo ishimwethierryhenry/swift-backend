@@ -34,4 +34,25 @@ twoFactorRoutes.delete("/trusted-devices/:deviceFingerprint", TwoFactorControlle
 twoFactorRoutes.get("/trusted-devices", TwoFactorController.getTrustedDevices);
 twoFactorRoutes.post("/check-trusted-device", TwoFactorController.checkTrustedDevice);
 
+// Add this to your twoFactorRoutes.js
+twoFactorRoutes.get("/debug-endpoints", (req, res) => {
+  res.status(200).json({
+    message: "Available 2FA endpoints",
+    endpoints: [
+      "POST /2fa/setup",
+      "POST /2fa/enable", 
+      "POST /2fa/disable",
+      "POST /2fa/verify-current",
+      "POST /2fa/verify",
+      "POST /2fa/verify-login",
+      "GET /2fa/status",
+      "POST /2fa/regenerate-backup-codes",
+      "POST /2fa/trusted-devices",
+      "DELETE /2fa/trusted-devices/:deviceFingerprint",
+      "GET /2fa/trusted-devices",
+      "POST /2fa/check-trusted-device"
+    ]
+  });
+});
+
 export default twoFactorRoutes;

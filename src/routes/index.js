@@ -9,6 +9,7 @@ import waterQualityRoutes from "./waterQualityRoutes.js";
 import guestFeedbackRoutes from "./guestFeedbackRoutes.js";
 import twoFactorRoutes from "./twoFactorRoutes.js";
 import passwordRoutes from "./passwordRoutes.js"; // ✅ ADD THIS LINE
+import analyticsRoutes from './analyticsRoutes.js';
 
 const router = express.Router();
 
@@ -31,5 +32,6 @@ router.use("/water-quality", waterQualityRoutes);
 router.use("/guest-feedback", guestFeedbackRoutes);
 router.use("/2fa", twoFactorRoutes);
 router.use("/password", passwordRoutes); // ✅ ADD THIS LINE
+router.use('/analytics', analyticsRoutes);
 
 export default router;
