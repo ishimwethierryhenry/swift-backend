@@ -1,4 +1,4 @@
-// src/middlewares/isLoggedin.js
+// src/middlewares/isLoggedin.js - UPDATED VERSION
 import tokenDecode from "../helpers/tokenDec";
 
 export const isLoggedin = async (req, res, next) => {
@@ -28,12 +28,18 @@ export const isLoggedin = async (req, res, next) => {
   try {
     const decoded = tokenDecode(token);
     console.log('Token decoded successfully:', {
-      userId: decoded.payload?.user?.id,
-      userRole: decoded.payload?.user?.role,
-      userLocation: decoded.payload?.user?.location
+      userId: decoded.payload?.user?.id || decoded.payload?.id,
+      userRole: decoded.payload?.user?.role || decoded.payload?.role,
+      userLocation: decoded.payload?.user?.location || decoded.payload?.location
     });
     
-    req.user = decoded.payload.user; // ✅ Changed this line to match verifyRole.js
+    // FIXED: Ensure consistent structure
+    if (decoded.payload.user) {
+      req.user = decoded.payload.user; // Keep nested structure: { id, role, fname, lname, ... }
+    } else {
+      req.user = decoded.payload; // Handle flat structure: { id, role, fname, lname, ... }
+    }
+    
     next();
   } catch (err) {
     console.error('Token decode error:', err.message);
